@@ -3,7 +3,7 @@
 #define SCREEN_WIDTH        80
 #define SCREEN_HEIGHT       60
 
-#define USE_SERIAL              1
+#define USE_SERIAL              0
 
 #define EXTERNAL_EEPROM         0
 #define EXTERNAL_EEPROM_ADDR    0x50    // I2C address (7 bits)
