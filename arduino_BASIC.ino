@@ -58,7 +58,7 @@ void setup() {
     // show memory size
     host_outputFreeMem(sysVARSTART - sysPROGEND);
     host_showBuffer();
-    
+
     // IF USING EXTERNAL EEPROM
     // The following line 'wipes' the external EEPROM and prepares
     // it for use. Uncomment it, upload the sketch, then comment it back

@@ -26,12 +26,12 @@ void initTimer() {
     TCCR1B = 0;
     timer1_counter = 34286;   // preload timer 65536-16MHz/256/2Hz
     TCNT1 = timer1_counter;   // preload timer
-    TCCR1B |= (1 << CS12);    // 256 prescaler 
+    TCCR1B |= (1 << CS12);    // 256 prescaler
     TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
     interrupts();             // enable all interrupts
 }
 
-ISR(TIMER1_OVF_vect)        // interrupt service routine 
+ISR(TIMER1_OVF_vect)        // interrupt service routine
 {
     TCNT1 = timer1_counter;   // preload timer
     flash = !flash;
@@ -84,7 +84,7 @@ void host_startupTone() {
             delay(3-i);
         }
         delay(100);
-    }    
+    }
 }
 
 void host_cls() {
@@ -100,7 +100,7 @@ void host_moveCursor(int x, int y) {
     if (y<0) y = 0;
     if (y>=SCREEN_HEIGHT) y = SCREEN_HEIGHT-1;
     curX = x;
-    curY = y; 
+    curY = y;
 }
 
 void host_showBuffer() {
@@ -167,7 +167,7 @@ int host_outputInt(long num) {
         c++;
         xx *= 10;
         i /= 10;
-    } 
+    }
     while (i);
 
     for (int i=0; i<c; i++) {
@@ -182,7 +182,7 @@ char *host_floatToStr(float f, char *buf) {
     // floats have approx 7 sig figs
     float a = fabs(f);
     if (f == 0.0f) {
-        buf[0] = '0'; 
+        buf[0] = '0';
         buf[1] = 0;
     }
     else if (a<0.0001 || a>1000000) {
@@ -201,7 +201,7 @@ char *host_floatToStr(float f, char *buf) {
                 *p-- = 0;
             }
             if (*p == '.') *p = 0;
-        }   
+        }
     }
     return buf;
 }
@@ -294,7 +294,7 @@ void host_outputFreeMem(unsigned int val)
     host_newLine();
     host_outputInt(val);
     host_outputChar(' ');
-    host_outputProgMemString(bytesFreeStr);      
+    host_outputProgMemString(bytesFreeStr);
 }
 
 void host_saveProgram(bool autoexec) {
@@ -316,7 +316,7 @@ void host_loadProgram() {
 #include <I2cMaster.h>
 extern TwiMaster rtc;
 
-void writeExtEEPROM(unsigned int address, byte data) 
+void writeExtEEPROM(unsigned int address, byte data)
 {
   if (address % 32 == 0) host_click();
   rtc.start((EXTERNAL_EEPROM_ADDR<<1)|I2C_WRITE);
@@ -326,8 +326,8 @@ void writeExtEEPROM(unsigned int address, byte data)
   rtc.stop();
   delay(5);
 }
- 
-byte readExtEEPROM(unsigned int address) 
+
+byte readExtEEPROM(unsigned int address)
 {
   rtc.start((EXTERNAL_EEPROM_ADDR<<1)|I2C_WRITE);
   rtc.write((int)(address >> 8));   // MSB
@@ -344,7 +344,7 @@ unsigned int getExtEEPROMAddr(char *fileName) {
     while (1) {
         unsigned int len = readExtEEPROM(addr) | (readExtEEPROM(addr+1) << 8);
         if (len == 0) break;
-        
+
         if (fileName) {
             bool found = true;
             for (int i=0; i<=strlen(fileName); i++) {
@@ -389,7 +389,7 @@ bool host_removeExtEEPROM(char *fileName) {
         writeExtEEPROM(addr, b);
         addr++;
     }
-    return true;    
+    return true;
 }
 
 bool host_loadExtEEPROM(char *fileName) {
@@ -419,7 +419,7 @@ bool host_saveExtEEPROM(char *fileName) {
     for (int i=0; i<strlen(fileName); i++)
         writeExtEEPROM(addr++, fileName[i]);
     writeExtEEPROM(addr++, 0);
-    // write length & program    
+    // write length & program
     writeExtEEPROM(addr++, sysPROGEND & 0xFF);
     writeExtEEPROM(addr++, (sysPROGEND >> 8) & 0xFF);
     for (int i=0; i<sysPROGEND; i++)
