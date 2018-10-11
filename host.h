@@ -1,9 +1,11 @@
 #include <stdint.h>
 
-#define SCREEN_WIDTH        21
-#define SCREEN_HEIGHT       8
+#define SCREEN_WIDTH        80
+#define SCREEN_HEIGHT       60
 
-#define EXTERNAL_EEPROM         1
+#define USE_SERIAL              1
+
+#define EXTERNAL_EEPROM         0
 #define EXTERNAL_EEPROM_ADDR    0x50    // I2C address (7 bits)
 #define EXTERNAL_EEPROM_SIZE    32768   // only <=32k tested (64k might work?)
 
@@ -33,6 +35,7 @@ bool host_ESCPressed();
 void host_outputFreeMem(unsigned int val);
 void host_saveProgram(bool autoexec);
 void host_loadProgram();
+void host_setColor(int foreGround,int backGround);
 
 #if EXTERNAL_EEPROM
 #include <I2cMaster.h>

@@ -1,6 +1,3 @@
-#include <font.h>
-#include <SSD1306ASCII.h>
-// ^ - modified for faster SPI
 #include <PS2Keyboard.h>
 #include <EEPROM.h>
 
@@ -22,34 +19,30 @@ TwiMaster rtc(true);
 #endif
 
 // Keyboard
-const int DataPin = 8;
-const int IRQpin =  3;
+const int DataPin = 4;
+const int IRQpin =  5;
 PS2Keyboard keyboard;
 
-// OLED
-#define OLED_DATA 9
-#define OLED_CLK 10
-#define OLED_DC 11
-#define OLED_CS 12
-#define OLED_RST 13
-SSD1306ASCII oled(OLED_DATA, OLED_CLK, OLED_DC, OLED_RST, OLED_CS);
-
-// NB Keyboard needs a seperate ground from the OLED
-
 // buzzer pin, 0 = disabled/not present
-#define BUZZER_PIN    5
+#define BUZZER_PIN    0
 
 // BASIC
 unsigned char mem[MEMORY_SIZE];
-#define TOKEN_BUF_SIZE    64
+#define TOKEN_BUF_SIZE    79
 unsigned char tokenBuf[TOKEN_BUF_SIZE];
 
 const char welcomeStr[] PROGMEM = "Arduino BASIC";
 char autorun = 0;
 
 void setup() {
+#if USE_SERIAL
+    Serial.begin(4800);
+#endif
+
+    DDRA  |=  B11110000; // OUTPUT
+    PORTA &= ~B11110000; // LOW
+
     keyboard.begin(DataPin, IRQpin);
-    oled.ssd1306_init(SSD1306_SWITCHCAPVCC);
 
     reset();
     host_init(BUZZER_PIN);

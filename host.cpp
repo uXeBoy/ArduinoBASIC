@@ -1,15 +1,14 @@
 #include "host.h"
 #include "basic.h"
 
-#include <SSD1306ASCII.h>
 #include <PS2Keyboard.h>
 #include <EEPROM.h>
 
-extern SSD1306ASCII oled;
 extern PS2Keyboard keyboard;
 extern EEPROMClass EEPROM;
 int timer1_counter;
 
+const uint8_t bitMask[8] = {1, 2, 4, 8, 16, 32, 64, 128};
 char screenBuffer[SCREEN_WIDTH*SCREEN_HEIGHT];
 char lineDirty[SCREEN_HEIGHT];
 int curX = 0, curY = 0;
@@ -41,7 +40,7 @@ ISR(TIMER1_OVF_vect)        // interrupt service routine
 
 void host_init(int buzzerPin) {
     buzPin = buzzerPin;
-    oled.clear();
+    // oled.clear();
     if (buzPin)
         pinMode(buzPin, OUTPUT);
     initTimer();
@@ -104,14 +103,38 @@ void host_moveCursor(int x, int y) {
 }
 
 void host_showBuffer() {
-    for (int y=0; y<SCREEN_HEIGHT; y++) {
+    for (uint8_t y=0; y<SCREEN_HEIGHT; y++) {
         if (lineDirty[y] || (inputMode && y==curY)) {
-            oled.setCursor(0,y);
-            for (int x=0; x<SCREEN_WIDTH; x++) {
+            // oled.setCursor(0,y);
+            PORTA &= ~B00010000; // cs LOW
+            PORTA |=  B00100000; // dc HIGH
+            for (uint8_t b = 0; b < 7; b++) {
+                if (y & bitMask[b]) PORTA |=  B01000000; // d0
+                else                PORTA &= ~B01000000;
+                PORTA |=  B10000000; // wclk HIGH
+                PORTA &= ~B10000000; // wclk LOW
+            }
+            // Latch data
+            PORTA &= ~B00100000; // dc LOW
+            PORTA |=  B10000000; // wclk HIGH
+            PORTA &= ~B10000000; // wclk LOW
+
+            for (uint8_t x=0; x<SCREEN_WIDTH; x++) {
                 char c = screenBuffer[y*SCREEN_WIDTH+x];
-                if (c<32) c = ' ';
+                if (c<32 || c>126) c = ' ';
                 if (x==curX && y==curY && inputMode && flash) c = 127;
-                oled.print(c);
+                // oled.print(c);
+                PORTA |=  B00110000; // cs HIGH, dc HIGH
+                for (uint8_t b = 0; b < 8; b++) {
+                    if (c & bitMask[b]) PORTA |=  B01000000; // d0
+                    else                PORTA &= ~B01000000;
+                    PORTA |=  B10000000; // wclk HIGH
+                    PORTA &= ~B10000000; // wclk LOW
+                }
+                // Latch data
+                PORTA &= ~B00100000; // dc LOW
+                PORTA |=  B10000000; // wclk HIGH
+                PORTA &= ~B10000000; // wclk LOW
             }
             lineDirty[y] = 0;
         }
@@ -123,6 +146,21 @@ void scrollBuffer() {
     memset(screenBuffer + SCREEN_WIDTH*(SCREEN_HEIGHT-1), 32, SCREEN_WIDTH);
     memset(lineDirty, 1, SCREEN_HEIGHT);
     curY--;
+}
+
+void host_setColor(int foreGround,int backGround) {
+        uint8_t colors = 128 + (foreGround << 3) + backGround;
+        PORTA |=  B00110000; // cs HIGH, dc HIGH
+        for (uint8_t b = 0; b < 8; b++) {
+            if (colors & bitMask[b]) PORTA |=  B01000000; // d0
+            else                     PORTA &= ~B01000000;
+            PORTA |=  B10000000; // wclk HIGH
+            PORTA &= ~B10000000; // wclk LOW
+        }
+        // Latch data
+        PORTA &= ~B00100000; // dc LOW
+        PORTA |=  B10000000; // wclk HIGH
+        PORTA &= ~B10000000; // wclk LOW
 }
 
 void host_outputString(char *str) {
@@ -231,16 +269,30 @@ char *host_readLine() {
 
     bool done = false;
     while (!done) {
+#if USE_SERIAL
+        while (Serial.available()) {
+#else
         while (keyboard.available()) {
+#endif
             host_click();
             // read the next key
             lineDirty[pos / SCREEN_WIDTH] = 1;
+#if USE_SERIAL
+            char c = Serial.read();
+#else
             char c = keyboard.read();
+#endif
             if (c>=32 && c<=126)
                 screenBuffer[pos++] = c;
-            else if (c==PS2_DELETE && pos > startPos)
+#if USE_SERIAL
+            else if (c == '\b' && pos > startPos)
                 screenBuffer[--pos] = 0;
-            else if (c==PS2_ENTER)
+            else if (c == '\r')
+#else
+            else if (c == PS2_DELETE && pos > startPos)
+                screenBuffer[--pos] = 0;
+            else if (c == PS2_ENTER)
+#endif
                 done = true;
             curX = pos % SCREEN_WIDTH;
             curY = pos / SCREEN_WIDTH;
@@ -280,10 +332,19 @@ char host_getKey() {
 }
 
 bool host_ESCPressed() {
+#if USE_SERIAL
+    while (Serial.available()) {
+#else
     while (keyboard.available()) {
+#endif
         // read the next key
+#if USE_SERIAL
+        inkeyChar = Serial.read();
+        if (inkeyChar == 27)
+#else
         inkeyChar = keyboard.read();
         if (inkeyChar == PS2_ESC)
+#endif
             return true;
     }
     return false;
@@ -431,4 +492,3 @@ bool host_saveExtEEPROM(char *fileName) {
 }
 
 #endif
-

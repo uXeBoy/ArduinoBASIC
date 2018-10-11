@@ -112,7 +112,7 @@ const char* const errorTable[] PROGMEM = {
 #define TKN_ARG_SHIFT       3
 // bits 7,8 formatting
 #define TKN_FMT_POST        0x40
-#define TKN_FMT_PRE     0x80
+#define TKN_FMT_PRE         0x80
 
 
 PROGMEM const TokenTableEntry tokenTable[] = {
@@ -132,7 +132,7 @@ PROGMEM const TokenTableEntry tokenTable[] = {
     {"RIGHT$",2|TKN_ARG1_TYPE_STR|TKN_RET_TYPE_STR}, {"MID$",3|TKN_ARG1_TYPE_STR|TKN_RET_TYPE_STR}, {"CLS",TKN_FMT_POST}, {"PAUSE",TKN_FMT_POST},
     {"POSITION", TKN_FMT_POST},  {"PIN",TKN_FMT_POST}, {"PINMODE", TKN_FMT_POST}, {"INKEY$", 0},
     {"SAVE", TKN_FMT_POST}, {"LOAD", TKN_FMT_POST}, {"PINREAD",1}, {"ANALOGRD",1},
-    {"DIR", TKN_FMT_POST}, {"DELETE", TKN_FMT_POST}
+    {"DIR", TKN_FMT_POST}, {"DELETE", TKN_FMT_POST}, {"COLOR", TKN_FMT_POST}
 };
 
 
@@ -1515,6 +1515,12 @@ int parseTwoIntCmd() {
         case TOKEN_PINMODE:
             host_pinMode(first,second);
             break;
+        case TOKEN_COLOR:
+            if (first < 0 || first > 7 || second < 0 || second > 7 || first == second)
+                return ERROR_BAD_PARAMETER;
+            else
+                host_setColor(first,second);
+            break;
         }
     }
     return 0;
@@ -1831,6 +1837,7 @@ int parseStmts()
         case TOKEN_POSITION:
         case TOKEN_PIN:
         case TOKEN_PINMODE:
+        case TOKEN_COLOR:
             ret = parseTwoIntCmd();
             break;
 
@@ -1981,4 +1988,3 @@ void reset() {
     stopStmtNumber = 0;
     lineNumber = 0;
 }
-
