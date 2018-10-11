@@ -1,18 +1,20 @@
-//////////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer:
+////////////////////////////////////////////////////////////////////////////////////
+// 'chars.v' adapted from:
 //
-// Character generator holding 8x8 character images.
-// Input char is a 4-bit character number representing:
-// 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, B, F, i, z, <blank>
+// https://github.com/shirriff/vga-fpga-fizzbuzz/blob/master/src/chars.v
+// https://github.com/milanvidakovic/FPGAComputer/blob/master/chars.v
+//
+// Character generator holding 8x8 character images
+// Input char is an 8-bit ASCII character code
 // Input rownum is the desired row of the pixel image
-// Output pixels is the 8 pixel row, pixels[7] is leftmost.
+// Output pixels is the 8 pixel row, pixels[7] is leftmost
 // Original font from https://github.com/dhepper/font8x8/blob/master/font8x8_basic.h
+
 module chars(
     input [7:0] char,
     input [2:0] rownum,
     output reg [7:0] pixels
-    );
+);
 
 always @(*)
   case ({char, rownum})
@@ -863,14 +865,14 @@ always @(*)
     11'b01111100110: pixels = 8'b00011000; //    XX
     11'b01111100111: pixels = 8'b00000000; //
 
-    11'b10111101000: pixels = 8'b11111111; // XXXXXXX
-    11'b10111101001: pixels = 8'b11111111; // XXXXXXX
-    11'b10111101010: pixels = 8'b11111111; // XXXXXXX
-    11'b10111101011: pixels = 8'b11111111; // XXXXXXX
-    11'b10111101100: pixels = 8'b11111111; // XXXXXXX
-    11'b10111101101: pixels = 8'b11111111; // XXXXXXX
-    11'b10111101110: pixels = 8'b11111111; // XXXXXXX
-    11'b10111101111: pixels = 8'b11111111; // XXXXXXX
+    11'b01111111000: pixels = 8'b11111111; // XXXXXXXX
+    11'b01111111001: pixels = 8'b11111111; // XXXXXXXX
+    11'b01111111010: pixels = 8'b11111111; // XXXXXXXX
+    11'b01111111011: pixels = 8'b11111111; // XXXXXXXX
+    11'b01111111100: pixels = 8'b11111111; // XXXXXXXX
+    11'b01111111101: pixels = 8'b11111111; // XXXXXXXX
+    11'b01111111110: pixels = 8'b11111111; // XXXXXXXX
+    11'b01111111111: pixels = 8'b11111111; // XXXXXXXX
 
     11'b01100000000: pixels = 8'b01100000; //  XX
     11'b01100000001: pixels = 8'b00110000; //   XX
@@ -882,6 +884,6 @@ always @(*)
     11'b01100000111: pixels = 8'b00000000; //
 
 
-    default: pixels <= 8'b00000000;
+    default: pixels = 8'b00000000;
   endcase
 endmodule
