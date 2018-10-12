@@ -20,7 +20,7 @@ TwiMaster rtc(true);
 
 // Keyboard
 const int DataPin = 4;
-const int IRQpin =  5;
+const int IRQpin = 2;
 PS2Keyboard keyboard;
 
 // buzzer pin, 0 = disabled/not present
@@ -43,6 +43,15 @@ void setup() {
     PORTA &= ~B11110000; // LOW
 
     keyboard.begin(DataPin, IRQpin);
+    /* NOTE: in order to use the Arduino UNO*Pro with the PS2Keyboard library, I had
+       to add the lines below into the file /libraries/PS2Keyboard/utility/int_pins.h
+
+       // Arduino UNO*Pro
+       #elif defined(__AVR_ATmega1284P__)
+         #define CORE_INT0_PIN  6
+         #define CORE_INT1_PIN  7
+         #define CORE_INT2_PIN  2
+    */
 
     reset();
     host_init(BUZZER_PIN);

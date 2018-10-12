@@ -64,7 +64,7 @@ wire [addr_width-1:0] waddr;
 reg  [addr_width-1:0] waddr_r = 0;
 assign waddr = waddr_r;
 reg [2:0] bit_r = 0;
-reg [6:0] row_r = 0;
+reg [5:0] row_r = 0;
 
 always @(posedge wclk) // Write memory
 begin

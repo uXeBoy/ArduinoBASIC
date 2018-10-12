@@ -4,6 +4,8 @@ Now you can turn your Arduino into an 80's home computer!
 
 Refactored to use the VGA1306 board for 80x60 characters at 640x480 resolution, and added a COLOR command for selectable foreground / background colours - all 8 glorious colours of the 3-bit RGB rainbow!
 
+![](VGA1306_BASIC.jpg?raw=true)
+
 (the direct PORT manipulation commands used are specific to the ATmega1284)
 
 A complete BASIC interpreter for the Arduino, using a PS/2 keyboard. The BASIC supports almost all the usual features, with float and string variables, multi-dimensional arrays, FOR-NEXT, GOSUB-RETURN, etc. Saving and Loading from EEPROM is supported, as well as auto-running a program on power-up. You can also read and write from the analog and digital pins.

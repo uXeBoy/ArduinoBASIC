@@ -108,7 +108,7 @@ void host_showBuffer() {
             // oled.setCursor(0,y);
             PORTA &= ~B00010000; // cs LOW
             PORTA |=  B00100000; // dc HIGH
-            for (uint8_t b = 0; b < 7; b++) {
+            for (uint8_t b = 0; b < 6; b++) { // Max = 59, only 6 bits required
                 if (y & bitMask[b]) PORTA |=  B01000000; // d0
                 else                PORTA &= ~B01000000;
                 PORTA |=  B10000000; // wclk HIGH
